@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "program",
+    "script",
+]
+resolver = "2"
+
+[workspace.dependencies]
+alloy-sol-types = "0.7.7"
+reth-primitives = { git = "https://github.com/sp1-patches/reth", tag = "rsp-20240830", default-features = false, features = [
+    "alloy-compat",
+    "optimism",
+    "std",
+] }
+rsp-client-executor = {git = "https://github.com/succinctlabs/rsp.git"}
+nmt-rs = {git="https://github.com/Sovereign-Labs/nmt-rs.git"}
+celestia-types = "0.9.0"
+bincode = "1.3.3"

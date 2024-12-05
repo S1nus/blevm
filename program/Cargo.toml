@@ -1,0 +1,13 @@
+[package]
+version = "0.1.0"
+name = "blevm"
+edition = "2021"
+
+[dependencies]
+alloy-sol-types = { workspace = true }
+sp1-zkvm = "3.0.0-rc4"
+rsp-client-executor = {workspace=true}
+nmt-rs = {workspace=true}
+celestia-types = {workspace=true}
+reth-primitives = {workspace=true}
+bincode = {workspace=true}
