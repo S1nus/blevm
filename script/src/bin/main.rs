@@ -22,9 +22,15 @@ fn main() {
 
     // load the prev state + new block
     let input1: ClientExecutorInput = bincode::deserialize(&f).expect("could not deserialize");
+    let namespace: Namespace = Namespace::new_v0(&[0; 28]).unwrap();
+
     // Setup the prover client.
     let client = ProverClient::new();
 
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
+    stdin.write(&input1);
+    stdin.write(&namespace);
+
+    let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
 }
