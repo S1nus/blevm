@@ -2,9 +2,12 @@
 sp1_zkvm::entrypoint!(main);
 
 use celestia_types::{nmt::Namespace, AppVersion, Blob};
-use celestia_types::{nmt::NamespaceProof, ExtendedHeader};
+use celestia_types::{
+    nmt::{NamespaceProof, NamespacedHashExt},
+    ExtendedHeader,
+};
 use nmt_rs::simple_merkle::tree::MerkleHash;
-use nmt_rs::{simple_merkle::proof::Proof, TmSha2Hasher};
+use nmt_rs::{simple_merkle::proof::Proof, NamespacedHash, TmSha2Hasher};
 use reth_primitives::Block;
 use rsp_client_executor::{
     io::ClientExecutorInput, ChainVariant, ClientExecutor, EthereumVariant, CHAIN_ID_ETH_MAINNET,
@@ -21,6 +24,7 @@ pub fn main() {
     let proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
     let row_root_multiproof: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
     let nmt_multiproofs: Vec<NamespaceProof> = sp1_zkvm::io::read();
+    let row_roots: Vec<NamespacedHash<29>> = sp1_zkvm::io::read();
 
     let block = input.current_block.clone();
     println!("cycle-tracker-end: cloning and deserializing inputs");
@@ -39,9 +43,39 @@ pub fn main() {
     println!("cycle-tracker-start: serializing EVM block");
     let block_bytes = bincode::serialize(&block).unwrap();
     println!("cycle-tracker-end: serializing EVM block");
+
     println!("cycle-tracker-start: creating Blob");
     let blob = Blob::new(namespace, block_bytes, AppVersion::V3).unwrap();
     println!("cycle-tracker-end: creating Blob");
+
+    println!("cycle-tracker-start: blob to shares");
+    let shares = blob.to_shares().unwrap();
+    println!("cycle-tracker-end: blob to shares");
+
+    // Verify NMT multiproofs of blob shares into row roots
+    let mut start = 0;
+    for i in 0..nmt_multiproofs.len() {
+        let proof = nmt_multiproofs[i];
+        let root: NamespacedHash<29> = row_roots[i];
+        let end = start + (proof.end_idx() as usize - proof.start_idx() as usize);
+        proof
+            .verify_range(&root, &shares[start..end], namespace.into())
+            .expect("NMT multiproof into row root failed verification"); // Panicking should prevent an invalid proof from being generated
+        start = end;
+    }
+
+    // Verify row root inclusion into data root
+    let tm_hasher = TmSha2Hasher {};
+    let blob_row_root_hashes: Vec<[u8; 32]> = row_roots
+        .iter()
+        .map(|root| tm_hasher.hash_leaf(&root.to_array()))
+        .collect();
+    let result = row_root_multiproof.verify_range(
+        &data_hash_bytes
+            .try_into()
+            .expect("we already checked, this should be fine"),
+        &blob_row_root_hashes,
+    );
 
     // Commit the Celestia blob commitment for this block
     let blob_commitment = blob.commitment.0;
@@ -50,7 +84,7 @@ pub fn main() {
     // Execute the block
     println!("cycle-tracker-start: executing EVM block");
     let executor = ClientExecutor;
-    let header = executor.execute::<EthereumVariant>(input).unwrap(); // unwrap will prevent a proof of invalid execution from being generated
+    let header = executor.execute::<EthereumVariant>(input).unwrap(); // panicking should prevent a proof of invalid execution from being generated
     println!("cycle-tracker-end: executing EVM block");
 
     // Commit the header hash
