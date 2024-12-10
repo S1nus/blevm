@@ -10,6 +10,7 @@ rsp-client-executor = {workspace=true}
 nmt-rs = {workspace=true}
 celestia-types = {workspace=true}
 reth-primitives = {workspace=true}
+tendermint = {workspace=true}
 bincode = {workspace=true}
 
 [patch.crates-io]

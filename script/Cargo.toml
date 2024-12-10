@@ -9,6 +9,7 @@ name = "blevm"
 path = "src/bin/main.rs"
 
 [dependencies]
+nmt-rs = {workspace=true}
 sp1-sdk = "3.0.0"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.200", default-features = false, features = ["derive"] }
@@ -17,6 +18,8 @@ tracing = "0.1.40"
 hex = "0.4.3"
 alloy-sol-types = { workspace = true }
 celestia-types = {workspace=true}
+tendermint-proto = {workspace=true}
+tendermint = {workspace=true}
 reth-primitives = {workspace=true}
 bincode = {workspace=true}
 rsp-client-executor = {workspace=true}

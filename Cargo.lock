@@ -951,6 +951,7 @@ dependencies = [
  "reth-primitives",
  "rsp-client-executor",
  "sp1-zkvm",
+ "tendermint",
 ]
 
 [[package]]
@@ -962,12 +963,15 @@ dependencies = [
  "celestia-types",
  "clap",
  "hex",
+ "nmt-rs 0.2.3 (git+https://github.com/Sovereign-Labs/nmt-rs.git)",
  "reth-primitives",
  "rsp-client-executor",
  "serde",
  "serde_json",
  "sp1-helper",
  "sp1-sdk",
+ "tendermint",
+ "tendermint-proto",
  "tracing",
 ]
 

@@ -2,20 +2,39 @@
 sp1_zkvm::entrypoint!(main);
 
 use celestia_types::{nmt::Namespace, AppVersion, Blob};
+use celestia_types::{nmt::NamespaceProof, ExtendedHeader};
+use nmt_rs::simple_merkle::tree::MerkleHash;
+use nmt_rs::{simple_merkle::proof::Proof, TmSha2Hasher};
 use reth_primitives::Block;
 use rsp_client_executor::{
     io::ClientExecutorInput, ChainVariant, ClientExecutor, EthereumVariant, CHAIN_ID_ETH_MAINNET,
     CHAIN_ID_LINEA_MAINNET, CHAIN_ID_OP_MAINNET,
 };
+use tendermint::Hash as TmHash;
 
 pub fn main() {
     println!("cycle-tracker-start: cloning and deserializing inputs");
     let input: ClientExecutorInput = sp1_zkvm::io::read();
     let namespace: Namespace = sp1_zkvm::io::read();
+    let header_hash: TmHash = sp1_zkvm::io::read();
+    let data_hash_bytes: Vec<u8> = sp1_zkvm::io::read_vec();
+    let proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
+    let row_root_multiproof: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
+    let nmt_multiproofs: Vec<NamespaceProof> = sp1_zkvm::io::read();
 
-    // The clone here is not ideal
     let block = input.current_block.clone();
     println!("cycle-tracker-end: cloning and deserializing inputs");
+
+    // 1. Verify that the data root goes into the Celestia block hash
+    println!("cycle-tracker-start: verify data root");
+    let hasher = TmSha2Hasher {};
+    proof_data_hash_to_celestia_hash
+        .verify_range(
+            header_hash.as_bytes().try_into().unwrap(),
+            &[hasher.hash_leaf(&data_hash_bytes)],
+        )
+        .unwrap();
+    println!("cycle-tracker-end: verify data root");
 
     println!("cycle-tracker-start: serializing EVM block");
     let block_bytes = bincode::serialize(&block).unwrap();
