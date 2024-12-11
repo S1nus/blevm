@@ -1,12 +1,11 @@
 use bincode;
 use celestia_types::consts::appconsts::LATEST_VERSION;
 use celestia_types::AppVersion;
-use celestia_types::Blob;
+use celestia_types::{blob::Commitment, Blob};
 use celestia_types::{
     nmt::{Namespace, NamespaceProof},
     ExtendedHeader,
 };
-use hex;
 use nmt_rs::simple_merkle::tree::MerkleHash;
 use nmt_rs::{
     simple_merkle::{db::MemDb, proof::Proof, tree::MerkleTree},
@@ -18,6 +17,8 @@ use tendermint_proto::{
     Protobuf,
 };
 
+use celestia_rpc::{BlobClient, Client};
+use core::cmp::max;
 use rsp_client_executor::{
     io::ClientExecutorInput, ChainVariant, ClientExecutor, EthereumVariant, CHAIN_ID_ETH_MAINNET,
     CHAIN_ID_LINEA_MAINNET, CHAIN_ID_OP_MAINNET,
@@ -28,7 +29,27 @@ use std::fs;
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
 pub const BLEVM_ELF: &[u8] = include_elf!("blevm");
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    let token = std::env::var("CELESTIA_NODE_AUTH_TOKEN").expect("Token not provided");
+    let client = Client::new("ws://localhost:26658", Some(&token))
+        .await
+        .expect("Failed creating rpc client");
+    let blob = client
+        .blob_get(
+            2966903,
+            Namespace::new_v0(&hex::decode("0f0f0f0f0f0f0f0f0f0f").unwrap()).unwrap(),
+            Commitment(
+                hex::decode("2efab21bbd40a7d163dee0dd6192245a8bd9d61b0013d7da34a1878e8466e91f")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ),
+        )
+        .await
+        .expect("Failed getting blob");
+    println!("script {}", hex::encode(blob.commitment.0));
+
     // Setup the logger.
     sp1_sdk::utils::setup_logger();
 
@@ -36,11 +57,17 @@ fn main() {
 
     // load the prev state + new block
     let input1: ClientExecutorInput = bincode::deserialize(&f).expect("could not deserialize");
+
     let namespace: Namespace = Namespace::new_v0(&[15; 10]).unwrap(); // [15; 10] is just a randomly chosen valid namespace
 
     let header: ExtendedHeader =
         serde_json::from_str(&fs::read_to_string("header.json").unwrap()).unwrap();
     println!("header hash {:?}", header.hash());
+
+    let eds_row_roots = header.dah.row_roots();
+    let eds_column_roots = header.dah.column_roots();
+    let eds_size: u64 = eds_row_roots.len().try_into().unwrap();
+    let ods_size = eds_size / 2;
 
     let hasher = TmSha2Hasher {};
     let mut header_field_tree: MerkleTree<MemDb<[u8; 32]>, TmSha2Hasher> =
@@ -70,9 +97,11 @@ fn main() {
         header.header.evidence_hash.unwrap_or_default().encode_vec(),
         header.header.proposer_address.encode_vec(),
     ];
+
     for leaf in field_bytes {
         header_field_tree.push_raw_leaf(&leaf);
     }
+
     let computed_header_hash = header_field_tree.root();
     let (data_hash_bytes_from_tree, data_hash_proof) = header_field_tree.get_index_with_proof(6);
     let data_hash_from_tree = TmHash::decode_vec(&data_hash_bytes_from_tree).unwrap();
@@ -81,6 +110,7 @@ fn main() {
         header.header.data_hash.unwrap().as_bytes()
     );
     assert_eq!(header.hash().as_ref(), header_field_tree.root());
+
     let hasher = TmSha2Hasher {};
     data_hash_proof
         .verify_range(
@@ -100,6 +130,14 @@ fn main() {
         serde_json::from_str(&fs::read_to_string("nmt_multiproofs.json").unwrap()).unwrap();
     println!("num nmt multiproofs {:?}", nmt_multiproofs.len());
 
+    let blob_index: u64 = blob.index.unwrap();
+    // calculate the blob_size, measured in "shares".
+    let blob_size: u64 = max(1, blob.data.len() as u64 / 512);
+    let first_row_index: u64 = blob_index.div_ceil(eds_size) - 1;
+    let ods_index = blob.index.unwrap() - (first_row_index * ods_size);
+
+    let last_row_index: u64 = (ods_index + blob_size).div_ceil(ods_size) - 1;
+
     // Setup the prover client.
     let client = ProverClient::new();
 
@@ -112,6 +150,7 @@ fn main() {
     stdin.write(&data_hash_proof);
     stdin.write(&row_root_multiproof);
     stdin.write(&nmt_multiproofs);
+    stdin.write(&eds_row_roots[first_row_index as usize..(last_row_index + 1) as usize].to_vec());
 
     let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
 }

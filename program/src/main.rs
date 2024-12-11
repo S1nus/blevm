@@ -47,6 +47,7 @@ pub fn main() {
 
     println!("cycle-tracker-start: creating Blob");
     let blob = Blob::new(namespace, block_bytes, AppVersion::V3).unwrap();
+    println!("{}", hex::encode(blob.commitment.0));
     println!("cycle-tracker-end: creating Blob");
 
     println!("cycle-tracker-start: blob to shares");
@@ -55,12 +56,13 @@ pub fn main() {
 
     // Verify NMT multiproofs of blob shares into row roots
     let mut start = 0;
+    println!("shares len {}", &shares.len());
+    println!("nmt multiproofs len {}", &nmt_multiproofs.len());
     for i in 0..nmt_multiproofs.len() {
-        let proof = nmt_multiproofs[i];
-        let root: NamespacedHash<29> = row_roots[i];
+        let proof = &nmt_multiproofs[i];
         let end = start + (proof.end_idx() as usize - proof.start_idx() as usize);
         proof
-            .verify_range(&root, &shares[start..end], namespace.into())
+            .verify_range(&row_roots[i], &shares[start..end], namespace.into())
             .expect("NMT multiproof into row root failed verification"); // Panicking should prevent an invalid proof from being generated
         start = end;
     }

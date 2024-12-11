@@ -13,8 +13,9 @@ reth-primitives = { git = "https://github.com/sp1-patches/reth", tag = "rsp-2024
     "std",
 ] }
 rsp-client-executor = {git = "https://github.com/succinctlabs/rsp.git"}
-celestia-types = "0.9.0"
+celestia-types = {path="../lumina/types"}
+celestia-rpc = {path="../lumina/rpc"}
 tendermint-proto = "*"
 tendermint = "*"
 bincode = "1.3.3"
-# nmt-rs = "*"
+nmt-rs = "*"
