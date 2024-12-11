@@ -17,4 +17,4 @@ celestia-types = "0.9.0"
 tendermint-proto = "*"
 tendermint = "*"
 bincode = "1.3.3"
-nmt-rs = { git = "https://github.com/Sovereign-Labs/nmt-rs.git", features = ["serde"] }
+# nmt-rs = "*"

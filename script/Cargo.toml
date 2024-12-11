@@ -9,7 +9,7 @@ name = "blevm"
 path = "src/bin/main.rs"
 
 [dependencies]
-nmt-rs = {workspace=true}
+nmt-rs = {git="https://github.com/Sovereign-Labs/nmt-rs.git", rev="ac03d7c", features=["serde"]}
 sp1-sdk = "3.0.0"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 serde = { version = "1.0.200", default-features = false, features = ["derive"] }
@@ -26,3 +26,6 @@ rsp-client-executor = {workspace=true}
 
 [build-dependencies]
 sp1-helper = "3.0.0"
+
+[patch.crates-io]
+nmt-rs = {git="https://github.com/Sovereign-Labs/nmt-rs.git", features=["serde"]}

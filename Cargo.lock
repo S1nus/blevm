@@ -947,7 +947,7 @@ dependencies = [
  "alloy-sol-types 0.7.7",
  "bincode",
  "celestia-types",
- "nmt-rs",
+ "nmt-rs 0.1.0",
  "reth-primitives",
  "rsp-client-executor",
  "sp1-zkvm",
@@ -963,7 +963,7 @@ dependencies = [
  "celestia-types",
  "clap",
  "hex",
- "nmt-rs",
+ "nmt-rs 0.1.0",
  "reth-primitives",
  "rsp-client-executor",
  "serde",
@@ -1188,7 +1188,7 @@ dependencies = [
  "libp2p-identity",
  "multiaddr",
  "multihash",
- "nmt-rs",
+ "nmt-rs 0.2.3",
  "prost",
  "ruint",
  "serde",
@@ -3583,6 +3583,16 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "nmt-rs"
+version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/nmt-rs.git?rev=ac03d7c#ac03d7c7620bab1e14256aa2fde8e425631a5278"
+dependencies = [
+ "bytes",
+ "serde",
+ "sha2 0.10.8",
 ]
 
 [[package]]
