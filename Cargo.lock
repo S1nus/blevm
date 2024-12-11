@@ -947,7 +947,7 @@ dependencies = [
  "alloy-sol-types 0.7.7",
  "bincode",
  "celestia-types",
- "nmt-rs 0.2.3 (git+https://github.com/Sovereign-Labs/nmt-rs.git)",
+ "nmt-rs",
  "reth-primitives",
  "rsp-client-executor",
  "sp1-zkvm",
@@ -963,7 +963,7 @@ dependencies = [
  "celestia-types",
  "clap",
  "hex",
- "nmt-rs 0.2.3 (git+https://github.com/Sovereign-Labs/nmt-rs.git)",
+ "nmt-rs",
  "reth-primitives",
  "rsp-client-executor",
  "serde",
@@ -1188,7 +1188,7 @@ dependencies = [
  "libp2p-identity",
  "multiaddr",
  "multihash",
- "nmt-rs 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nmt-rs",
  "prost",
  "ruint",
  "serde",
@@ -3590,17 +3590,6 @@ name = "nmt-rs"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e408e823bdc9b4bb525a61b44e846239833a8f9bd86c03a43e4ca314a5497582"
-dependencies = [
- "borsh",
- "bytes",
- "serde",
- "sha2 0.10.8",
-]
-
-[[package]]
-name = "nmt-rs"
-version = "0.2.3"
-source = "git+https://github.com/Sovereign-Labs/nmt-rs.git#7b73324b92c8c43f9caa124ad4e5510be01c221d"
 dependencies = [
  "borsh",
  "bytes",

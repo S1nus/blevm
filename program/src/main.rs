@@ -1,13 +1,14 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 
+use celestia_types::nmt::NamespacedHash;
 use celestia_types::{nmt::Namespace, AppVersion, Blob};
 use celestia_types::{
     nmt::{NamespaceProof, NamespacedHashExt},
     ExtendedHeader,
 };
 use nmt_rs::simple_merkle::tree::MerkleHash;
-use nmt_rs::{simple_merkle::proof::Proof, NamespacedHash, TmSha2Hasher};
+use nmt_rs::{simple_merkle::proof::Proof, TmSha2Hasher};
 use reth_primitives::Block;
 use rsp_client_executor::{
     io::ClientExecutorInput, ChainVariant, ClientExecutor, EthereumVariant, CHAIN_ID_ETH_MAINNET,
