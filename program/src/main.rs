@@ -15,6 +15,7 @@ use rsp_client_executor::{
     CHAIN_ID_LINEA_MAINNET, CHAIN_ID_OP_MAINNET,
 };
 use tendermint::Hash as TmHash;
+use tendermint_proto::Protobuf;
 
 pub fn main() {
     println!("cycle-tracker-start: cloning and deserializing inputs");
@@ -22,6 +23,7 @@ pub fn main() {
     let namespace: Namespace = sp1_zkvm::io::read();
     let header_hash: TmHash = sp1_zkvm::io::read();
     let data_hash_bytes: Vec<u8> = sp1_zkvm::io::read_vec();
+    let data_hash: TmHash = TmHash::decode_vec(&data_hash_bytes).unwrap();
     let proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
     let row_root_multiproof: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
     let nmt_multiproofs: Vec<NamespaceProof> = sp1_zkvm::io::read();
@@ -59,8 +61,11 @@ pub fn main() {
     println!("shares len {}", &shares.len());
     println!("nmt multiproofs len {}", &nmt_multiproofs.len());
     for i in 0..nmt_multiproofs.len() {
+        println!("i {}", i);
         let proof = &nmt_multiproofs[i];
         let end = start + (proof.end_idx() as usize - proof.start_idx() as usize);
+        println!("start {}", start);
+        println!("end {}", end);
         proof
             .verify_range(&row_roots[i], &shares[start..end], namespace.into())
             .expect("NMT multiproof into row root failed verification"); // Panicking should prevent an invalid proof from being generated
@@ -74,9 +79,7 @@ pub fn main() {
         .map(|root| tm_hasher.hash_leaf(&root.to_array()))
         .collect();
     let result = row_root_multiproof.verify_range(
-        &data_hash_bytes
-            .try_into()
-            .expect("we already checked, this should be fine"),
+        data_hash.as_bytes().try_into().unwrap(),
         &blob_row_root_hashes,
     );
 

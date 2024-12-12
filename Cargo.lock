@@ -953,6 +953,7 @@ dependencies = [
  "rsp-client-executor",
  "sp1-zkvm",
  "tendermint",
+ "tendermint-proto",
 ]
 
 [[package]]
