@@ -22,6 +22,7 @@ pub fn main() {
     let input: ClientExecutorInput = sp1_zkvm::io::read();
     let namespace: Namespace = sp1_zkvm::io::read();
     let header_hash: TmHash = sp1_zkvm::io::read();
+    sp1_zkvm::io::commit(&header_hash);
     let data_hash_bytes: Vec<u8> = sp1_zkvm::io::read_vec();
     let data_hash: TmHash = TmHash::decode_vec(&data_hash_bytes).unwrap();
     let proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
