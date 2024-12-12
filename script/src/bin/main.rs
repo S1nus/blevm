@@ -1,7 +1,7 @@
 use bincode;
 use celestia_types::consts::appconsts::LATEST_VERSION;
 use celestia_types::AppVersion;
-use celestia_types::{blob::Commitment, Blob};
+use celestia_types::{blob::Commitment, Blob, TxConfig};
 use celestia_types::{
     nmt::{Namespace, NamespaceProof},
     ExtendedHeader,
@@ -31,16 +31,38 @@ pub const BLEVM_ELF: &[u8] = include_elf!("blevm");
 
 #[tokio::main]
 async fn main() {
+    let namespace: Namespace =
+        Namespace::new_v0(&hex::decode("0f0f0f0f0f0f0f0f0f0f").unwrap()).unwrap();
+
+    /*let input_bytes = fs::read("input/1/18884864.bin").expect("could not read file");
+    let input: ClientExecutorInput =
+        bincode::deserialize(&input_bytes).expect("could not deserialize");
+    let block = input.current_block.clone();
+    let block_bytes = bincode::serialize(&block).unwrap();
+    let blob = Blob::new(namespace, block_bytes, AppVersion::V3).unwrap();
+    println!("{}", hex::encode(blob.commitment.0))*/
+
+    /*let height: u64 = client
+        .blob_submit(&[blob.clone()], TxConfig::default())
+        .await
+        .unwrap();
+
+    let blob_from_chain = client
+        .blob_get(height, namespace, blob.commitment.clone())
+        .await
+        .unwrap();*/
+
     let token = std::env::var("CELESTIA_NODE_AUTH_TOKEN").expect("Token not provided");
     let client = Client::new("ws://localhost:26658", Some(&token))
         .await
         .expect("Failed creating rpc client");
+
     let blob = client
         .blob_get(
-            2966903,
-            Namespace::new_v0(&hex::decode("0f0f0f0f0f0f0f0f0f0f").unwrap()).unwrap(),
+            2988873,
+            namespace,
             Commitment(
-                hex::decode("2efab21bbd40a7d163dee0dd6192245a8bd9d61b0013d7da34a1878e8466e91f")
+                hex::decode("7946cf528edd745efb25201246e647d5aaca3fb52bf0f606b695b4ab0bd33f4c")
                     .unwrap()
                     .try_into()
                     .unwrap(),
