@@ -1160,6 +1160,7 @@ dependencies = [
 [[package]]
 name = "celestia-proto"
 version = "0.6.0"
+source = "git+https://github.com/S1nus/lumina.git?rev=c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3#c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3"
 dependencies = [
  "bytes",
  "prost",
@@ -1174,6 +1175,7 @@ dependencies = [
 [[package]]
 name = "celestia-rpc"
 version = "0.8.0"
+source = "git+https://github.com/S1nus/lumina.git?rev=c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3#c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3"
 dependencies = [
  "async-trait",
  "celestia-types",
@@ -1188,6 +1190,7 @@ dependencies = [
 [[package]]
 name = "celestia-types"
 version = "0.9.0"
+source = "git+https://github.com/S1nus/lumina.git?rev=c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3#c2971dfbccc0b56a2ad61ea587ca84c11fcfb1a3"
 dependencies = [
  "base64 0.22.1",
  "bech32 0.11.0",
