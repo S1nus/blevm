@@ -21,8 +21,7 @@ pub fn main() {
     println!("cycle-tracker-start: cloning and deserializing inputs");
     let input: ClientExecutorInput = sp1_zkvm::io::read();
     let namespace: Namespace = sp1_zkvm::io::read();
-    let header_hash: TmHash = sp1_zkvm::io::read();
-    sp1_zkvm::io::commit(&header_hash);
+    let celestia_header_hash: TmHash = sp1_zkvm::io::read();
     let data_hash_bytes: Vec<u8> = sp1_zkvm::io::read_vec();
     let data_hash: TmHash = TmHash::decode_vec(&data_hash_bytes).unwrap();
     let proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher> = sp1_zkvm::io::read();
@@ -33,12 +32,12 @@ pub fn main() {
     let block = input.current_block.clone();
     println!("cycle-tracker-end: cloning and deserializing inputs");
 
-    // 1. Verify that the data root goes into the Celestia block hash
+    // Verify that the data root goes into the Celestia block hash
     println!("cycle-tracker-start: verify data root");
     let hasher = TmSha2Hasher {};
     proof_data_hash_to_celestia_hash
         .verify_range(
-            header_hash.as_bytes().try_into().unwrap(),
+            celestia_header_hash.as_bytes().try_into().unwrap(),
             &[hasher.hash_leaf(&data_hash_bytes)],
         )
         .unwrap();
@@ -58,22 +57,20 @@ pub fn main() {
     println!("cycle-tracker-end: blob to shares");
 
     // Verify NMT multiproofs of blob shares into row roots
+    println!("cycle-tracker-start: verify NMT multiproofs of blob shares into row roots");
     let mut start = 0;
-    println!("shares len {}", &shares.len());
-    println!("nmt multiproofs len {}", &nmt_multiproofs.len());
     for i in 0..nmt_multiproofs.len() {
-        println!("i {}", i);
         let proof = &nmt_multiproofs[i];
         let end = start + (proof.end_idx() as usize - proof.start_idx() as usize);
-        println!("start {}", start);
-        println!("end {}", end);
         proof
             .verify_range(&row_roots[i], &shares[start..end], namespace.into())
             .expect("NMT multiproof into row root failed verification"); // Panicking should prevent an invalid proof from being generated
         start = end;
     }
+    println!("cycle-tracker-end: verify NMT multiproofs of blob shares into row roots");
 
     // Verify row root inclusion into data root
+    println!("cycle-tracker-start: verify row root inclusion into data root");
     let tm_hasher = TmSha2Hasher {};
     let blob_row_root_hashes: Vec<[u8; 32]> = row_roots
         .iter()
@@ -83,10 +80,7 @@ pub fn main() {
         data_hash.as_bytes().try_into().unwrap(),
         &blob_row_root_hashes,
     );
-
-    // Commit the Celestia blob commitment for this block
-    let blob_commitment = blob.commitment.0;
-    sp1_zkvm::io::commit_slice(&blob_commitment);
+    println!("cycle-tracker-end: verify row root inclusion into data root");
 
     // Execute the block
     println!("cycle-tracker-start: executing EVM block");
@@ -96,8 +90,12 @@ pub fn main() {
 
     // Commit the header hash
     println!(
-        "cycle-tracker-start: hashing the block header, and commiting its fields as public values"
+        "cycle-tracker-start: hashing the block header, and commiting fields as public values"
     );
+
+    // Commit the Celestia blob commitment for this block
+    let blob_commitment = blob.commitment.0;
+    sp1_zkvm::io::commit_slice(&blob_commitment);
     let header_hash: Vec<u8> = header.hash_slow().to_vec();
     sp1_zkvm::io::commit_slice(&header_hash);
 
@@ -118,6 +116,8 @@ pub fn main() {
 
     let state_root = header.state_root.as_slice();
     sp1_zkvm::io::commit_slice(&state_root);
+
+    sp1_zkvm::io::commit(&celestia_header_hash);
     println!(
         "cycle-tracker-end: hashing the block header, and commiting its fields as public values"
     );
