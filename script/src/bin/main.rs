@@ -201,5 +201,16 @@ async fn main() {
     stdin.write(&nmt_multiproofs);
     stdin.write(&eds_row_roots[first_row_index as usize..(last_row_index + 1) as usize].to_vec());
 
-    let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
+    // Serialize stdin to file for debugging
+    let stdin_bytes = bincode::serialize(&stdin).expect("Failed to serialize stdin");
+    fs::write("stdin.bin", stdin_bytes).expect("Failed to write stdin to file");
+
+    //let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
+
+    let (pk, vk) = client.setup(&BLEVM_ELF);
+
+    let proof = client.prove(&pk, stdin).core().run().unwrap();
+
+    let proof_bytes = bincode::serialize(&proof).expect("Failed to serialize proof");
+    fs::write("proof.bin", proof_bytes).expect("Failed to write proof to file");
 }
