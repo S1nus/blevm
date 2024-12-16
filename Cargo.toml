@@ -22,6 +22,8 @@ nmt-rs = "*"
 sp1-sdk = "3.4.0"
 sp1-zkvm = "3.4.0"
 sp1-helper = "3.4.0"
+sp1-core-executor = "3.4.0"
+sp1-stark = "3.4.0"
 
 [patch.crates-io]
 ecdsa-core = { git = "https://github.com/sp1-patches/signatures", package = "ecdsa", tag = "ecdsa-v0.16.9-patch-v3.3.0" }

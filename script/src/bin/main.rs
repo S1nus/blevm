@@ -25,6 +25,10 @@ use rsp_client_executor::{
 };
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 use std::fs;
+use std::time::{Duration, Instant};
+
+use sp1_core_executor::{Executor, Program};
+use sp1_stark::SP1CoreOpts;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
 pub const BLEVM_ELF: &[u8] = include_elf!("blevm");
@@ -201,8 +205,32 @@ async fn main() {
     stdin.write(&nmt_multiproofs);
     stdin.write(&eds_row_roots[first_row_index as usize..(last_row_index + 1) as usize].to_vec());
 
+    let program = Program::from(&BLEVM_ELF).unwrap();
+    let opts = SP1CoreOpts::default();
+    let mut runtime = Executor::new(program, opts);
+    runtime.write_vecs(&stdin.buffer);
+    let mut index = 0;
+    let start = Instant::now();
+    loop {
+        let (checkpoint, done) = runtime.execute_state().unwrap();
+        println!("executed state {}", index);
+        println!("are we done: {}", done);
+        let (execution_record, _) = runtime.execute_record().unwrap();
+        println!(
+            "checkpoint {} got {} records",
+            index,
+            execution_record.len()
+        );
+        if done {
+            break;
+        }
+        index += 1;
+    }
+    let end = Instant::now();
+    println!("time taken: {:?}", end.duration_since(start));
+
     // Serialize stdin to file for debugging
-    let stdin_bytes = bincode::serialize(&stdin).expect("Failed to serialize stdin");
+    /*let stdin_bytes = bincode::serialize(&stdin).expect("Failed to serialize stdin");
     fs::write("stdin.bin", stdin_bytes).expect("Failed to write stdin to file");
 
     //let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
@@ -212,5 +240,5 @@ async fn main() {
     let proof = client.prove(&pk, stdin).core().run().unwrap();
 
     let proof_bytes = bincode::serialize(&proof).expect("Failed to serialize proof");
-    fs::write("proof.bin", proof_bytes).expect("Failed to write proof to file");
+    fs::write("proof.bin", proof_bytes).expect("Failed to write proof to file");*/
 }
