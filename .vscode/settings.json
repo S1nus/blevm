@@ -1,7 +1,10 @@
 {
     "rust-analyzer.linkedProjects": [
-        "program/Cargo.toml",
-        "script/Cargo.toml"
+        "script/Cargo.toml",
+        "blevm/Cargo.toml",
+        "blevm-mock/Cargo.toml",
+        "blevm-aggregator/Cargo.toml",
+        "common/Cargo.toml"
     ],
     "rust-analyzer.check.overrideCommand": [
         "cargo",

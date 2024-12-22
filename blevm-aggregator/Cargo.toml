@@ -4,8 +4,9 @@ name = "blevm-aggregator"
 edition = "2021"
 
 [dependencies]
+hex-literal = "0.4.1"
 alloy-sol-types = { workspace = true }
-sp1-zkvm = "3.0.0-rc4"
+sp1-zkvm = { version = "3.0.0-rc4", features = ["verify"] }
 rsp-client-executor = {workspace=true}
 celestia-types = {workspace=true}
 nmt-rs = "*"
@@ -14,3 +15,6 @@ tendermint = {workspace=true}
 tendermint-proto = {workspace=true}
 bincode = {workspace=true}
 hex = "0.4.3"
+sha2 = "0.10.8"
+serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
+serde_cbor = "0.11.2"

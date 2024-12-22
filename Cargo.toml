@@ -1,8 +1,10 @@
 [workspace]
 members = [
-    "program",
-    "program-mock",
+    "blevm",
+    "blevm-mock",
     "script",
+    "blevm-aggregator",
+    "common",
 ]
 resolver = "2"
 

@@ -957,6 +957,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "blevm-aggregator"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types 0.7.7",
+ "bincode",
+ "celestia-types",
+ "hex",
+ "hex-literal",
+ "nmt-rs",
+ "reth-primitives",
+ "rsp-client-executor",
+ "serde",
+ "serde_cbor",
+ "sha2 0.10.8",
+ "sp1-zkvm",
+ "tendermint",
+ "tendermint-proto",
+]
+
+[[package]]
+name = "blevm-common"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
+]
+
+[[package]]
 name = "blevm-mock"
 version = "0.1.0"
 dependencies = [
@@ -2713,6 +2741,12 @@ dependencies = [
  "tokio-util",
  "tracing",
 ]
+
+[[package]]
+name = "half"
+version = "1.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b43ede17f21864e81be2fa654110bf1e793774238d86ef8555c37e6519c0403"
 
 [[package]]
 name = "halo2"
@@ -6237,6 +6271,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_cbor"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bef2ebfde456fb76bbcf9f59315333decc4fda0b2b44b420243c11e0f5ec1f5"
+dependencies = [
+ "half",
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.210"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6950,9 +6994,12 @@ dependencies = [
  "getrandom",
  "lazy_static",
  "libm",
+ "p3-baby-bear",
+ "p3-field",
  "rand",
  "sha2 0.10.8",
  "sp1-lib 3.4.0",
+ "sp1-primitives",
 ]
 
 [[package]]
