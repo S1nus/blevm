@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "program",
+    "program-mock",
     "script",
 ]
 resolver = "2"
