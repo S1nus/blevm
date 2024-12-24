@@ -5,6 +5,8 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 
+use blevm_common::BlevmOutput;
+
 pub fn main() {
     let blob_commitment = sp1_zkvm::io::read::<Vec<u8>>();
     let header_hash = sp1_zkvm::io::read::<Vec<u8>>();
@@ -15,12 +17,16 @@ pub fn main() {
     let state_root = sp1_zkvm::io::read::<Vec<u8>>();
     let celestia_header_hash = sp1_zkvm::io::read::<Vec<u8>>();
 
-    sp1_zkvm::io::commit_slice(&blob_commitment);
-    sp1_zkvm::io::commit_slice(&header_hash);
-    sp1_zkvm::io::commit_slice(&prev_header_hash);
-    sp1_zkvm::io::commit(&height);
-    sp1_zkvm::io::commit(&gas_used);
-    sp1_zkvm::io::commit_slice(&beneficiary);
-    sp1_zkvm::io::commit_slice(&state_root);
-    sp1_zkvm::io::commit(&celestia_header_hash);
+    let output = BlevmOutput {
+        blob_commitment: blob_commitment.try_into().unwrap(),
+        header_hash: header_hash.try_into().unwrap(),
+        prev_header_hash: prev_header_hash.try_into().unwrap(),
+        height,
+        gas_used,
+        beneficiary: beneficiary.try_into().unwrap(),
+        state_root: state_root.try_into().unwrap(),
+        celestia_header_hash: celestia_header_hash.try_into().unwrap(),
+    };
+
+    sp1_zkvm::io::commit(&output);
 }

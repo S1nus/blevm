@@ -946,6 +946,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types 0.7.7",
  "bincode",
+ "blevm-common",
  "celestia-types",
  "hex",
  "nmt-rs",
@@ -988,6 +989,7 @@ dependencies = [
 name = "blevm-mock"
 version = "0.1.0"
 dependencies = [
+ "blevm-common",
  "sp1-zkvm",
 ]
 

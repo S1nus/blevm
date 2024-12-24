@@ -7,7 +7,9 @@ use celestia_types::{
     ExtendedHeader,
 };
 use nmt_rs::simple_merkle::tree::MerkleHash;
+use std::io::Read;
 //use nmt_rs::{simple_merkle::proof::Proof, TmSha2Hasher};
+use blevm_common::BlevmOutput;
 use nmt_rs::{simple_merkle::proof::Proof, NamespacedHash, TmSha2Hasher};
 use reth_primitives::Block;
 use rsp_client_executor::{
@@ -93,31 +95,18 @@ pub fn main() {
         "cycle-tracker-start: hashing the block header, and commiting fields as public values"
     );
 
-    // Commit the Celestia blob commitment for this block
-    let blob_commitment = blob.commitment.0;
-    sp1_zkvm::io::commit_slice(&blob_commitment);
-    let header_hash: Vec<u8> = header.hash_slow().to_vec();
-    sp1_zkvm::io::commit_slice(&header_hash);
+    let output = BlevmOutput {
+        blob_commitment: blob.commitment.0,
+        header_hash: header.hash_slow().into(),
+        prev_header_hash: header.parent_hash.into(),
+        height: header.number,
+        gas_used: header.gas_used,
+        beneficiary: header.beneficiary.into(),
+        state_root: header.state_root.into(),
+        celestia_header_hash: celestia_header_hash.as_bytes().try_into().unwrap(),
+    };
+    sp1_zkvm::io::commit(&output);
 
-    // Commit the prev header hash, so we can form a blockchain
-    let prev_header_hash: Vec<u8> = header.parent_hash.to_vec();
-    sp1_zkvm::io::commit_slice(&prev_header_hash);
-
-    let height: u64 = header.number;
-    sp1_zkvm::io::commit(&height);
-
-    let gas_used: u64 = header.gas_used;
-    sp1_zkvm::io::commit(&gas_used);
-
-    // beneficiary is the address of the person who collects the fees
-    // usually the proposer
-    let beneficiary = header.beneficiary.as_slice();
-    sp1_zkvm::io::commit_slice(&beneficiary);
-
-    let state_root = header.state_root.as_slice();
-    sp1_zkvm::io::commit_slice(&state_root);
-
-    sp1_zkvm::io::commit(&celestia_header_hash);
     println!(
         "cycle-tracker-end: hashing the block header, and commiting its fields as public values"
     );

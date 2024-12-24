@@ -4,5 +4,5 @@ name = "blevm-common"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1.0.200", default-features = false, features = ["derive"] }
+serde = { workspace = true }
 bincode = { workspace = true }
