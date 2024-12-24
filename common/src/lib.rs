@@ -11,3 +11,12 @@ pub struct BlevmOutput {
     pub state_root: [u8; 32],
     pub celestia_header_hash: [u8; 32],
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct BlevmAggOutput {
+    pub newest_header_hash: [u8; 32],
+    pub oldest_header_hash: [u8; 32],
+    pub celestia_header_hashes: Vec<[u8; 32]>,
+    pub newest_state_root: [u8; 32],
+    pub newest_height: u64,
+}

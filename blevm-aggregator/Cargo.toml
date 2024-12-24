@@ -4,6 +4,7 @@ name = "blevm-aggregator"
 edition = "2021"
 
 [dependencies]
+blevm-common = { path = "../common" }
 hex-literal = "0.4.1"
 alloy-sol-types = { workspace = true }
 sp1-zkvm = { version = "3.0.0-rc4", features = ["verify"] }

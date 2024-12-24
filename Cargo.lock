@@ -963,6 +963,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types 0.7.7",
  "bincode",
+ "blevm-common",
  "celestia-types",
  "hex",
  "hex-literal",

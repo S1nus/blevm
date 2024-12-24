@@ -1,6 +1,7 @@
 mod buffer;
 use buffer::Buffer;
 
+use blevm_common::{BlevmAggOutput, BlevmOutput};
 use sha2::{Digest, Sha256};
 
 // Verification key of blevm-mock (Dec 22 2024)
@@ -26,6 +27,23 @@ pub fn main() {
         &proof2_values_hash.into(),
     );
 
-    let buffer1 = Buffer::from(&public_values1);
-    let buffer2 = Buffer::from(&public_values2);
+    let mut buffer1 = Buffer::from(&public_values1);
+    let mut buffer2 = Buffer::from(&public_values2);
+
+    let output1 = buffer1.read::<BlevmOutput>();
+    let output2 = buffer2.read::<BlevmOutput>();
+
+    if output1.header_hash != output2.prev_header_hash {
+        panic!("header hash mismatch");
+    }
+
+    let agg_output = BlevmAggOutput {
+        newest_header_hash: output2.header_hash,
+        oldest_header_hash: output1.header_hash,
+        celestia_header_hashes: vec![output1.celestia_header_hash, output2.celestia_header_hash],
+        newest_state_root: output2.state_root,
+        newest_height: output2.height,
+    };
+
+    sp1_zkvm::io::commit(&agg_output);
 }
