@@ -983,7 +983,12 @@ name = "blevm-common"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "celestia-types",
+ "nmt-rs",
+ "rsp-client-executor",
  "serde",
+ "tendermint",
+ "tendermint-proto",
 ]
 
 [[package]]
