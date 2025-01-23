@@ -11,8 +11,8 @@ use tendermint::Hash as TmHash;
 pub struct BlevmInput {
     pub input: ClientExecutorInput,
     pub namespace: Namespace,
-    pub celestia_header_hash: TmHash,
-    pub data_hash: TmHash,
+    pub celestia_header_hash: Vec<u8>, // changed from TmHash due to serialization issues
+    pub data_hash: Vec<u8>,            // changed from TmHash
     pub proof_data_hash_to_celestia_hash: Proof<TmSha2Hasher>,
     pub row_root_multiproof: Proof<TmSha2Hasher>,
     pub nmt_multiproofs: Vec<NamespaceProof>,
