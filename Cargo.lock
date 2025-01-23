@@ -983,7 +983,12 @@ name = "blevm-common"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "celestia-types",
+ "nmt-rs",
+ "rsp-client-executor",
  "serde",
+ "tendermint",
+ "tendermint-proto",
 ]
 
 [[package]]
@@ -1000,6 +1005,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types 0.7.7",
  "bincode",
+ "blevm-common",
  "celestia-rpc",
  "celestia-types",
  "clap",
