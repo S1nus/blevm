@@ -17,6 +17,7 @@ use tendermint_proto::{
     Protobuf,
 };
 
+use blevm_common::{BlevmInput, BlevmOutput};
 use celestia_rpc::{BlobClient, Client, HeaderClient};
 use core::cmp::max;
 use rsp_client_executor::{
@@ -27,7 +28,8 @@ use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 use std::fs;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const BLEVM_ELF: &[u8] = include_elf!("blevm");
+//pub const BLEVM_ELF: &[u8] = include_elf!("blevm");
+pub const BLEVM_ELF: &[u8] = include_bytes!("../../../target/elf-compilation/riscv32im-succinct-zkvm-elf/release/blevm");
 
 #[tokio::main]
 async fn main() {
@@ -187,6 +189,31 @@ async fn main() {
     // Setup the logger.
     sp1_sdk::utils::setup_logger();
 
+    let input = BlevmInput{
+        blob_commitment: blob_from_chain.commitment.0,
+        celestia_header_hash: header.hash().as_bytes().try_into().unwrap(),
+        state_root: input.current_block.state_root.0.try_into().unwrap(),
+        evm_header_hash: input.current_block.header.hash_slow().0,
+        prev_evm_header_hash: input.parent_header().hash_slow().0,
+        height: input.current_block.number,
+        gas_used: input.current_block.gas_used,
+        beneficiary: input.current_block.beneficiary.0.try_into().unwrap(),
+        input: input,
+        namespace: namespace,
+        data_hash: data_hash_from_tree.as_bytes().try_into().unwrap(),
+        proof_data_hash_to_celestia_hash: data_hash_proof,
+        row_root_multiproof: row_root_multiproof,
+        nmt_multiproofs: nmt_multiproofs,
+        row_roots: eds_row_roots[first_row_index as usize..(last_row_index + 1) as usize].to_vec(),
+    };
+
+    let client = ProverClient::new();
+    let mut stdin = SP1Stdin::new();
+    stdin.write(&input);
+    let (output, report) = client.execute(BLEVM_ELF, stdin).run().unwrap();
+
+    /*
+
     // Setup the prover client.
     let client = ProverClient::new();
 
@@ -213,4 +240,5 @@ async fn main() {
 
     let proof_bytes = bincode::serialize(&proof).expect("Failed to serialize proof");
     fs::write("proof.bin", proof_bytes).expect("Failed to write proof to file");
+    */
 }
