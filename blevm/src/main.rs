@@ -98,13 +98,13 @@ pub fn main() {
 
     let output = BlevmOutput {
         blob_commitment: blob.commitment.0,
-        header_hash: header.hash_slow().into(),
-        prev_header_hash: header.parent_hash.into(),
+        evm_header_hash: header.hash_slow().into(),
+        prev_evm_header_hash: header.parent_hash.into(),
         height: header.number,
         gas_used: header.gas_used,
         beneficiary: header.beneficiary.into(),
         state_root: header.state_root.into(),
-        celestia_header_hash: blevm_input.celestia_header_hash.try_into().unwrap(),
+        celestia_header_hash: blevm_input.celestia_header_hash,
     };
     sp1_zkvm::io::commit(&output);
 
